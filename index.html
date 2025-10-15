@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>All India Driver News (हिन्दी)</title>
+  <meta name="description" content="All India taxi/cab/driver news — हिंदी में रोज़ाना headlines" />
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans',sans-serif;margin:0;background:#0b1220;color:#e6eef6}
+    .wrap{max-width:980px;margin:20px auto;padding:16px}
+    header{display:flex;gap:12px;align-items:center}
+    h1{margin:0;font-size:20px}
+    .controls{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+    input,select{padding:8px;border-radius:8px;background:#071026;border:1px solid rgba(255,255,255,0.04);color:inherit}
+    .btn{background:#06b6d4;border:none;padding:8px 12px;border-radius:8px;cursor:pointer}
+    .card{background:rgba(255,255,255,0.02);padding:12px;border-radius:10px;margin-top:12px}
+    a{color:inherit}
+    .meta{font-size:12px;color:#9fb0c7;margin-top:6px}
+    .list{display:grid;gap:10px;margin-top:10px}
+    @media(max-width:600px){.controls{flex-direction:column}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div style="width:52px;height:52px;border-radius:10px;background:linear-gradient(90deg,#06b6d4,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:700">DN</div>
+      <div>
+        <h1>All India Driver News — हिंदी</h1>
+        <div class="meta">ETAuto, Times of India, NDTV, Indian Express, Hindustan Times और लोकल RSS फीड से हेडलाइंस</div>
+      </div>
+    </header>
+
+    <div class="controls">
+      <input id="q" placeholder="खोजें: जैसे 'strike', 'fare', 'Mumbai'" />
+      <select id="stateSelect">
+        <option value="all">सभी राज्य (All India)</option>
+        <option value="Delhi">Delhi</option>
+        <option value="Maharashtra">Maharashtra</option>
+        <option value="Karnataka">Karnataka</option>
+        <option value="Tamil Nadu">Tamil Nadu</option>
+        <option value="West Bengal">West Bengal</option>
+        <option value="Uttar Pradesh">Uttar Pradesh</option>
+        <option value="Punjab">Punjab</option>
+        <option value="Rajasthan">Rajasthan</option>
+        <option value="Gujarat">Gujarat</option>
+      </select>
+      <button class="btn" id="refreshBtn">रिफ्रेश</button>
+      <button class="btn" id="tgBtn">Telegram पर आज की ख़बरें</button>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-weight:700">Top Headlines — आज</div>
+        <div id="status" class="meta">लोड़ कर रहा है...</div>
+      </div>
+      <div class="list" id="headlines"></div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:700">State-wise हेडलाइंस</div>
+      <div id="stateList"></div>
+    </div>
+
+    <footer style="margin-top:14px;font-size:13px;color:#9fb0c7">Made for: <strong>All India Driver News (हिन्दी)</strong> — RSS + Telegram automation</footer>
+  </div>
+
+  <script>
+    const API_BASE = 'https://YOUR_BACKEND_DOMAIN' // replace with your deployed backend URL
+
+    async function fetchHeadlines(){
+      const res = await fetch(API_BASE + '/api/top');
+      const j = await res.json();
+      return j;
+    }
+
+    function render(items){
+      document.getElementById('status').textContent = items.length + ' खबरें';
+      const container = document.getElementById('headlines'); container.innerHTML='';
+      items.slice(0,12).forEach(it=>{
+        const div = document.createElement('div'); div.className='card';
+        div.innerHTML = `<div style="font-weight:600"><a href="${it.link}" target="_blank">${it.title}</a></div><div class="meta">${it.source} · ${new Date(it.pubDate).toLocaleString()}</div>`;
+        container.appendChild(div);
+      });
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click', async()=>{ const d=await fetchHeadlines(); render(d); });
+    document.getElementById('tgBtn').addEventListener('click', ()=>{ window.open('https://t.me/your_driver_channel','_blank') });
+
+    (async()=>{ try{ const d=await fetchHeadlines(); render(d);}catch(e){document.getElementById('status').textContent='सर्वर से डेटा नहीं आ रहा'} })();
+  </script>
+</body>
+</html>
